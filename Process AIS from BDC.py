@@ -4,12 +4,12 @@ import os
 import zipfile
 arcpy.env.overwriteOutput = True
 
-# define variables
+# Define Variables
 input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
 out_tracks = 'C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/Reconstruct_Tracks_Out.gdb/AIS_Tracks_2020'
 start_date = "1/1/2020"
 
-# Constants (should use uppercase for constants ex: TRACK_FIELDS
+# Define Constants (should use uppercase for constants ex: TRACK_FIELDS
 TRACK_FIELDS = "MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TranscieverClass"
 VESSEL_TYPE_INFO = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Vessel_Traffic_Schema.gdb\VesselType_Codes"
 YEARLY_GDB = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Yearly_Vessel_Tracks.gdb"
@@ -25,16 +25,16 @@ def log(message):
     print(message,datetime.now())
 
 def process_tracks():
-    log("Starting reconstructing tracks....")
+    log("-----INITIALIZING RECONSTRUCT TRACKS-----")
     with arcpy.EnvManager(outputCoordinateSystem='PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],'
                                              'PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],'
                                              'PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],'
                                              'UNIT["Meter",1.0]]'):
         arcpy.gapro.ReconstructTracks(input_BDC, out_tracks, TRACK_FIELDS, "GEODESIC", '', None, None, "30 Minutes", "1 Miles", "1 Days", start_date, "SOG MEAN;COG MEAN;Heading MEAN", None, "GAP")
-    log("Finished reconstructing tracks....")
+    log("-----COMPLETED RECONSTRUCT TRACKS-----")
 
 def manage_attributes():
-    log("Starting attribute management.....")
+    log("-----INITIALIZING ATTRIBUTE MANAGEMENT-----")
     VESSEL_TYPE = "vessel_type"
     log("Managing field names.....")
     arcpy.management.AlterField(out_tracks, "VesselName", "vessel_name", "vessel name")
@@ -42,24 +42,25 @@ def manage_attributes():
     arcpy.management.AlterField(out_tracks, "TranscieverClass", "transceiver_class", "transceiver class")
     arcpy.management.AlterField(out_tracks, "COUNT", "vertices", "vertices")
 
-    log("Joining vessel group and vessel class fields.....")
+    log("Joining vessel group and vessel class fields using vessel type codes.....")
     arcpy.management.JoinField(out_tracks, VESSEL_TYPE, VESSEL_TYPE_INFO, VESSEL_TYPE, ["vessel_group", "vessel_class"])
 
-    log("Assign other to null values for vessel group and vessel class.....")
+    log("Assign Other to NULL values for vessel group.....")
     arcpy.management.CalculateField(out_tracks, "vessel_group", '"Other" if !'+VESSEL_TYPE+'! is None else !vessel_group!',
                                     "PYTHON3", '', "TEXT", "NO_ENFORCE_DOMAINS")
+    log("Assign Other to NULL values for vessel class.....")
     arcpy.management.CalculateField(out_tracks, "vessel_class", '"Other" if !'+VESSEL_TYPE+'! is None else !vessel_class!',
                                     "PYTHON3", '', "TEXT", "NO_ENFORCE_DOMAINS")
-    log("Adding date attributes.....")
+    log("Adding date attributes for month and day.....")
     arcpy.ca.AddDateAttributes(out_tracks, "END_DATE", "MONTH month;DAY_OF_MONTH day")
-    log("Finished attribute management.....")
+    log("-----COMPLETED ATTRIBUTE MANAGEMENT-----")
 
 def optimize_tracks():
-    log("Starting optimizing tracks.....")
-    log("Create empty feature class.....")
+    log("-----INITIALIZING TRACK OPTIMIZATION-----")
+    log("Creating empty feature class for tracks.....")
     arcpy.CreateFeatureclass_management(YEARLY_GDB, YEAR_NAME, "POLYLINE",
                                         TRACK_SCHEMA, "DISABLED", "DISABLED")
-    log("Append tracks to empty feature class.....")
+    log("Appending tracks to empty feature class.....")
     arcpy.management.Append(out_tracks, CLEAN_TRACKS, "NO_TEST")
 
     log("Defining projection on tracks.....")
@@ -68,11 +69,11 @@ def optimize_tracks():
                                                     'PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],'
                                                     'PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],'
                                                     'PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],UNIT["Meter",1.0]]')
-    log("Finished optimizing tracks.....")
+    log("-----COMPLETED TRACK OPTIMIZATION-----")
 
 def create_products():
-    log("Create products.....")
-    log("Create value list.....")
+    log("-----INITIALIZING PRODUCT GENERATION-----")
+    log("Creating value list.....")
     valueList = []  # array to hold list of values collected
     valueSet = set()  # set to hold values to test against to get list
     rows = arcpy.SearchCursor(CLEAN_TRACKS)
@@ -85,7 +86,7 @@ def create_products():
     valueList.sort()
     log("Done creating value list.....")
 
-    log("Creating monthly tracks.....")
+    log("Beginning to create monthly tracks.....")
     for x in valueList:
         xname = f"{x:02d}"
         out_FC = MONTHLY_GDB + "\\" + YEAR_NAME + "_" + xname
@@ -95,23 +96,30 @@ def create_products():
         monthly_fc = gdbFile + "\\" + out_FC_month
         outFile = gdbFile[0:-4] + '.zip'
         gdbName = os.path.basename(gdbFile)
+        log("Selecting tracks for " + out_FC_month)
         arcpy.analysis.Select(CLEAN_TRACKS, out_FC, where_clause)
-        log("Creating zip files.....")
+        log("Creating monthly file geodatabase for " + out_FC_month)
         arcpy.management.CreateFileGDB(MONTHLY_TRACKS_FOLDER, out_FC_month)
+        log("Creating monthly feature class for " + out_FC_month)
         arcpy.management.CopyFeatures(out_FC,monthly_fc)
+        log("Creating zip file for " + out_FC_month)
         with zipfile.ZipFile(outFile, mode='w',
                              compression=zipfile.ZIP_DEFLATED,
                              allowZip64=True) as myzip:
             for f in os.listdir(gdbFile):
                 if f[-5:] != '.lock':
                     myzip.write(os.path.join(gdbFile, f), gdbName + '\\' + os.path.basename(f))
-        log("Done creating zip files.....")
+        log("Done creating zip file for " + out_FC_month)
     log("Done creating monthly tracks.....")
+    log("-----COMPLETED PRODUCT GENERATION-----")
 
-log("Start Processing.......")
+
+log("********** PROCESS AIS FROM BIG DATA CONNECTION **********")
+start_time = datetime.now()
 process_tracks()
 manage_attributes()
 optimize_tracks()
 create_products()
-log("Finished Processing.......")
-
+time_elapsed = datetime.now() - start_time
+print('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed))
+log("********** PROCESS AIS FROM BIG DATA CONNECTION **********")
