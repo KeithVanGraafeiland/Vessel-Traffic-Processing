@@ -17,7 +17,7 @@ MONTHLY_GDB = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\M
 TRACK_SCHEMA = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Vessel_Traffic_Schema.gdb\Vessel_Tracks_Schema"
 TRACK_NAME = os.path.split(out_tracks)[1]
 TRACK_YEAR = TRACK_NAME.split("_")[2]
-YEAR_NAME = "Vessel_Tracks_" + TRACK_YEAR
+YEAR_NAME = "US_Vessel_Traffic_" + TRACK_YEAR
 MONTHLY_TRACKS_FOLDER = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Monthly_Products"
 CLEAN_TRACKS = YEARLY_GDB + "\\" + YEAR_NAME
 
