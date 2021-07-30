@@ -36,8 +36,9 @@ def clip_tracks(track_fc, chart_poly):
     print(track_fc)
     where_clause = "\"Name\" = " + "\'" + chart_poly + "\'"
     print(where_clause)
-    arcpy.management.SelectLayerByAttribute(charts_fc, "NEW_SELECTION",where_clause )
-    arcpy.analysis.Clip(in_feature_class, charts_fc, out_feature_class)
+    chart_poly_lyr = chart_poly + "_lyr"
+    arcpy.management.MakeFeatureLayer(charts_fc, chart_poly_lyr, where_clause),
+    arcpy.analysis.Clip(in_feature_class, chart_poly_lyr, out_feature_class)
 
 for track in tracks_list:
     for chart in charts_list:
