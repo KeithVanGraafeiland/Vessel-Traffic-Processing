@@ -2,11 +2,12 @@ import arcpy
 from datetime import datetime
 import os
 import zipfile
+
 arcpy.env.overwriteOutput = True
 
 # Define Variables
 input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-out_tracks = 'C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/Reconstruct_Tracks_Out.gdb/AIS_Tracks_2020'
+out_tracks = 'C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/Reconstruct_Tracks_Out.gdb/US_Vessel_Traffic_2020'
 start_date = "1/1/2020"
 
 # Define Constants (should use uppercase for constants ex: TRACK_FIELDS
@@ -16,10 +17,11 @@ YEARLY_GDB = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Ye
 MONTHLY_GDB = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Monthly_Vessel_Tracks.gdb"
 TRACK_SCHEMA = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Vessel_Traffic_Schema.gdb\Vessel_Tracks_Schema"
 TRACK_NAME = os.path.split(out_tracks)[1]
-TRACK_YEAR = TRACK_NAME.split("_")[2]
+TRACK_YEAR = TRACK_NAME.split("_")[3]
 YEAR_NAME = "US_Vessel_Traffic_" + TRACK_YEAR
 MONTHLY_TRACKS_FOLDER = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS Processing\Monthly_Products"
 CLEAN_TRACKS = YEARLY_GDB + "\\" + YEAR_NAME
+
 
 def log(message):
     print(message,datetime.now())
