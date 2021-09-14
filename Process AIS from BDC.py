@@ -4,6 +4,7 @@ import os
 import zipfile
 
 arcpy.env.overwriteOutput = True
+## Tested in ArcGIS Pro 2.8.2 (Released)
 
 # Define Variables
 input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
