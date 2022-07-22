@@ -11,14 +11,14 @@ ROOT = "D:/AIS_Processing/"
 
 # Define Variables
 #input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-input_BDC = r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS_BDC.bdc\AIS_2017"
-out_tracks = ROOT + 'Reconstruct_Tracks_Out.gdb/US_Vessel_Traffic_2017'
-start_date = "1/1/2017"
+input_BDC = r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS_BDC.bdc\AIS_2021"
+out_tracks = ROOT + 'Reconstruct_Tracks_Out.gdb/US_Vessel_Traffic_2021'
+start_date = "1/1/2021"
 
 # Define Constants (should use uppercase for constants ex: TRACK_FIELDS
 
-#TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TranscieverClass'
-TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft'
+TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TranscieverClass'
+#TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft'
 VESSEL_TYPE_INFO = ROOT + 'Vessel_Traffic_Schema.gdb/VesselType_Codes'
 YEARLY_GDB = ROOT + 'Yearly_Vessel_Tracks.gdb'
 MONTHLY_GDB = ROOT + 'Monthly_Vessel_Tracks.gdb'
@@ -28,13 +28,14 @@ TRACK_YEAR = TRACK_NAME.split("_")[3]
 YEAR_NAME = 'US_Vessel_Traffic_' + TRACK_YEAR
 MONTHLY_TRACKS_FOLDER = ROOT + 'Monthly_Products'
 CLEAN_TRACKS = YEARLY_GDB + "\\" + YEAR_NAME
-
+bdc_file = r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS_BDC.bdc"
 
 def log(message):
     print(message,datetime.now())
 
 def process_tracks():
     log("-----INITIALIZING RECONSTRUCT TRACKS-----")
+    arcpy.gapro.RefreshBDC(bdc_file)
     with arcpy.EnvManager(outputCoordinateSystem='PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],'
                                              'PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],'
                                              'PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],'
@@ -48,7 +49,7 @@ def manage_attributes():
     log("Managing field names.....")
     arcpy.management.AlterField(out_tracks, "VesselName", "vessel_name", "vessel name")
     arcpy.management.AlterField(out_tracks, "VesselType", VESSEL_TYPE, "vessel type")
-    #arcpy.management.AlterField(out_tracks, "TranscieverClass", "transceiver_class", "transceiver class")
+    arcpy.management.AlterField(out_tracks, "TranscieverClass", "transceiver_class", "transceiver class")
     arcpy.management.AlterField(out_tracks, "COUNT", "vertices", "vertices")
 
     log("Joining vessel group and vessel class fields using vessel type codes.....")
