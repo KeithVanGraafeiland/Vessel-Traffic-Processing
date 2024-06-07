@@ -11,13 +11,14 @@ ROOT = "D:/AIS_Processing/"
 
 # Define Variables
 #input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-input_BDC = r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS_BDC.bdc\AIS_2021"
-out_tracks = ROOT + 'Reconstruct_Tracks_Out.gdb/US_Vessel_Traffic_2021'
-start_date = "1/1/2021"
+input_BDC = r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS_BDC.bdc\AIS_2023"
+out_tracks = ROOT + 'Reconstruct_Tracks_Out.gdb/US_Vessel_Traffic_2023'
+start_date = "1/1/2023"
 
 # Define Constants (should use uppercase for constants ex: TRACK_FIELDS
 
-TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TranscieverClass'
+TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TransceiverClass'
+#TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TranscieverClass'
 #TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft'
 VESSEL_TYPE_INFO = ROOT + 'Vessel_Traffic_Schema.gdb/VesselType_Codes'
 YEARLY_GDB = ROOT + 'Yearly_Vessel_Tracks.gdb'
@@ -49,7 +50,7 @@ def manage_attributes():
     log("Managing field names.....")
     arcpy.management.AlterField(out_tracks, "VesselName", "vessel_name", "vessel name")
     arcpy.management.AlterField(out_tracks, "VesselType", VESSEL_TYPE, "vessel type")
-    arcpy.management.AlterField(out_tracks, "TranscieverClass", "transceiver_class", "transceiver class")
+    arcpy.management.AlterField(out_tracks, "TransceiverClass", "transceiver_class", "transceiver class")
     arcpy.management.AlterField(out_tracks, "COUNT", "vertices", "vertices")
 
     log("Joining vessel group and vessel class fields using vessel type codes.....")
