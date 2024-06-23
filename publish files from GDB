@@ -20,72 +20,69 @@ print(hex_fc_list)
 def publish_hex_fc():    
      for hex_fc in hex_fc_list:
         hex_name = hex_db + "\\" + hex_fc
-        for layer in hex_map.listLayers():
-                # hex_map.removeLayer(layer)
-                # aprx.save
-                hex_map.addDataFromPath(hex_name)
-                aprx.save()
+        hex_map.addDataFromPath(hex_name)
+        aprx.save()
 
-                # Set output file names
-                outdir = r"E:\Temp\sd_draft"
-                service_name = str(hex_fc)
-                sddraft_filename = service_name + ".sddraft"
-                sddraft_output_filename = os.path.join(outdir, sddraft_filename)
-                sd_filename = service_name + ".sd"
-                sd_output_filename = os.path.join(outdir, sd_filename)
-                # Create FeatureSharingDraft and set metadata, portal folder, export data properties, and CIM symbols
-                server_type = "HOSTING_SERVER"
-                sddraft = hex_map.getWebLayerSharingDraft(server_type, "FEATURE", hex_fc)
-                sddraft.credits = "NOAA, BOEM, USCG, Marine Cadastre, Esri"
-                sddraft.description = "Monthly AIS Vessel Traffic Hexbin Summaries for "
-                sddraft.summary = "Monthly AIS Vessel Traffic Hexbin Summaries for"
-                sddraft.tags = "AIS, Vessel Traffic, U.S. Vessel Traffic"
-                sddraft.useLimitations = "These are use limitations"
-                sddraft.portalFolder = "AIS App"
-                sddraft.allowExporting = True
-                sddraft.useCIMSymbols = True
+        # Set output file names
+        outdir = r"E:\Temp\sd_draft"
+        service_name = str(hex_fc)
+        sddraft_filename = service_name + ".sddraft"
+        sddraft_output_filename = os.path.join(outdir, sddraft_filename)
+        sd_filename = service_name + ".sd"
+        sd_output_filename = os.path.join(outdir, sd_filename)
+        # Create FeatureSharingDraft and set metadata, portal folder, export data properties, and CIM symbols
+        server_type = "HOSTING_SERVER"
+        sddraft = hex_map.getWebLayerSharingDraft(server_type, "FEATURE", hex_fc)
+        sddraft.credits = "NOAA, BOEM, USCG, Marine Cadastre, Esri"
+        sddraft.description = "Monthly AIS Vessel Traffic Hexbin Summaries for "
+        sddraft.summary = "Monthly AIS Vessel Traffic Hexbin Summaries for"
+        sddraft.tags = "AIS, Vessel Traffic, U.S. Vessel Traffic"
+        sddraft.useLimitations = "These are use limitations"
+        sddraft.portalFolder = "AIS App"
+        sddraft.allowExporting = True
+        sddraft.useCIMSymbols = True
 
-                # Create Service Definition Draft file
-                sddraft.exportToSDDraft(sddraft_output_filename)
+        # Create Service Definition Draft file
+        sddraft.exportToSDDraft(sddraft_output_filename)
 
-                # Read the .sddraft file
-                docs = DOM.parse(sddraft_output_filename)
-                key_list = docs.getElementsByTagName('Key')
-                value_list = docs.getElementsByTagName('Value')
+        # Read the .sddraft file
+        docs = DOM.parse(sddraft_output_filename)
+        key_list = docs.getElementsByTagName('Key')
+        value_list = docs.getElementsByTagName('Value')
 
-                # Change following to "true" to share
-                SharetoOrganization = "false"
-                SharetoEveryone = "true"
-                SharetoGroup = "true"
-                # If SharetoGroup is set to "true", uncomment line below and provide group IDs
-                GroupID = "b094a38a8ebe4017b8f41cc7b0f6be22, e8ab96b3e6014fd48893348560752086"
+        # Change following to "true" to share
+        SharetoOrganization = "false"
+        SharetoEveryone = "true"
+        SharetoGroup = "true"
+        # If SharetoGroup is set to "true", uncomment line below and provide group IDs
+        GroupID = "b094a38a8ebe4017b8f41cc7b0f6be22, e8ab96b3e6014fd48893348560752086"
 
-                # Each key has a corresponding value. In all the cases, value of key_list[i] is value_list[i].
-                for i in range(key_list.length):
-                    if key_list[i].firstChild.nodeValue == "PackageUnderMyOrg":
-                        value_list[i].firstChild.nodeValue = SharetoOrganization
-                    if key_list[i].firstChild.nodeValue == "PackageIsPublic":
-                        value_list[i].firstChild.nodeValue = SharetoEveryone
-                    if key_list[i].firstChild.nodeValue == "PackageShareGroups":
-                        value_list[i].firstChild.nodeValue = SharetoGroup
-                    if SharetoGroup == "true" and key_list[i].firstChild.nodeValue == "PackageGroupIDs":
-                        value_list[i].firstChild.nodeValue = GroupID
+        # Each key has a corresponding value. In all the cases, value of key_list[i] is value_list[i].
+        for i in range(key_list.length):
+            if key_list[i].firstChild.nodeValue == "PackageUnderMyOrg":
+                value_list[i].firstChild.nodeValue = SharetoOrganization
+            if key_list[i].firstChild.nodeValue == "PackageIsPublic":
+                value_list[i].firstChild.nodeValue = SharetoEveryone
+            if key_list[i].firstChild.nodeValue == "PackageShareGroups":
+                value_list[i].firstChild.nodeValue = SharetoGroup
+            if SharetoGroup == "true" and key_list[i].firstChild.nodeValue == "PackageGroupIDs":
+                value_list[i].firstChild.nodeValue = GroupID
 
-                # Write to the .sddraft file
-                f = open(sddraft_output_filename, 'w')
-                docs.writexml(f)
-                f.close()
+        # Write to the .sddraft file
+        f = open(sddraft_output_filename, 'w')
+        docs.writexml(f)
+        f.close()
 
-                # Stage Service
-                print("Start Staging " + str(hex_fc))
-                arcpy.server.StageService(sddraft_output_filename, sd_output_filename)
+        # Stage Service
+        print("Start Staging " + str(hex_fc))
+        arcpy.server.StageService(sddraft_output_filename, sd_output_filename)
 
-                # Share to portal
-                print("Start Uploading " + str(hex_fc))
-                arcpy.server.UploadServiceDefinition(sd_output_filename, server_type)
+        # Share to portal
+        print("Start Uploading " + str(hex_fc))
+        arcpy.server.UploadServiceDefinition(sd_output_filename, server_type)
 
-                print("Finish Publishing " + str(hex_fc))
-                for layer in hex_map.listLayers:
-                        hex_map.removeLayer(layer)
-                        aprx.save
+        print("Finish Publishing " + str(hex_fc))
+        for rmlyr in hex_map.listLayers():
+                hex_map.removeLayer(rmlyr)
+        aprx.save
 publish_hex_fc()
