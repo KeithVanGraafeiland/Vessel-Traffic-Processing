@@ -5,11 +5,17 @@ from credentials import username, password
 ## Tested in ArcGIS Pro 2.8.3 (Released)
 
 # Define Variables
-vt_folder = r"D:\AIS_Processing\Vector_Tiles\R_03"
+vt_folder = r"E:\ArcGIS\Projects\AIS\processing\Vector_Tiles\Test"
 
-arcpy.env.workspace = vt_folder
-tile_list = os.listdir(vt_folder)
-print(tile_list)
+tile_list = []
+for file in os.listdir(vt_folder):
+    if file.endswith(".vtpk"):
+        print(os.path.join(vt_folder, file))
+        tile_list.append(str(file))
+
+# arcpy.env.workspace = vt_folder
+# tile_list = os.listdir(vt_folder)
+# print(tile_list)
 
 def publish_vector_tiles():
     for tile in tile_list:

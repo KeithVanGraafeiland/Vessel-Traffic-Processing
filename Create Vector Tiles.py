@@ -4,16 +4,16 @@ arcpy.env.overwriteOutput = True
 ## Tested in ArcGIS Pro 2.8.3 (Released)
 
 # Define Variables
-aprx = arcpy.mp.ArcGISProject(r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS.aprx")
-symbology_layer = r"D:\AIS_Processing\Vessel Traffic Layer Template Monthly.lyrx"
-vt_folder = r"D:\AIS_Processing\Vector_Tiles\R_03"
-vt_index = r"D:\AIS_Processing\Vector_Tile_Index.gdb\AIS_Vector_Tile_Index"
-tracks_db = r"D:\AIS_Processing\Monthly_Vessel_Tracks_by_Group.gdb"
-vt_index_gdb = r"D:\AIS_Processing\Vector_Tile_Index.gdb"
+aprx = arcpy.mp.ArcGISProject(r'E:\ArcGIS\Projects\AIS\AIS.aprx')
+symbology_layer = r"E:\ArcGIS\Projects\AIS\processing\Vessel Traffic Layer Template Monthly.lyrx"
+vt_folder = r"E:\ArcGIS\Projects\AIS\processing\Vector_Tiles\Test"
+vt_index = r"E:\ArcGIS\Projects\AIS\processing\Vector_Tiles\Test\vector_tile.gdb\vector_tile_index"
+tracks_db = r"E:\ArcGIS\Projects\AIS\processing\Monthly_Products\US_Vessel_Traffic_2016_01.gdb"
+vt_index_gdb = r"E:\ArcGIS\Projects\AIS\processing\Vector_Tiles\Test\vector_tile.gdb"
 
 arcpy.env.workspace = tracks_db
 tracks_list = []
-for fc in arcpy.ListFeatureClasses("*2016_01*"):
+for fc in arcpy.ListFeatureClasses("*2016*"):
     tracks_list.append(fc)
 print(tracks_list)
 
@@ -33,7 +33,7 @@ def create_vector_tiles():
         print(index_name)
         print(fc_layer)
         print(vt_package)
-        # arcpy.management.ApplySymbologyFromLayer(fc_layer,symbology_layer,"VALUE_FIELD vessel_group vessel_group", "MAINTAIN")
+        arcpy.management.ApplySymbologyFromLayer(fc_layer,symbology_layer,"VALUE_FIELD vessel_group vessel_group", "MAINTAIN")
         aprx.save()
         arcpy.management.CreateVectorTileIndex(
             in_map=vt_map,
