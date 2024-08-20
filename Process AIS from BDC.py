@@ -13,10 +13,10 @@ ROOT = 'E:/ArcGIS/Projects/AIS/processing/'
 
 # Define Variables
 #input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-input_BDC = r'E:\ArcGIS\Projects\AIS\AIS.mfc\AIS_2016'
+input_BDC = r'E:\ArcGIS\Projects\AIS\AIS.mfc\AIS2015'
 out_tracks_gdb = os.path.join(ROOT, 'Reconstruct_Tracks_Out.gdb')
-out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2016')
-start_date = "1/1/2016"
+out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2015')
+start_date = "1/1/2015"
 
 # Define Constants (should use uppercase for constants ex: TRACK_FIELDS
 
