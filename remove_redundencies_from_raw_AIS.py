@@ -6,10 +6,10 @@ from math import radians, cos, sin, sqrt, atan2
 
 
 # Directory containing the input ZIP files
-zip_dir = 'AIS_2016_January'
+zip_dir = r"E:\AIS\MarineCadastre\2023"
 
 # Directory to save extracted CSV files
-extract_dir = 'AIS_2016_January_Processed'
+extract_dir = r"E:\AIS\MarineCadastre\2023\processed"
 
 # Two adjacent points of the same vessel within this threshold will be removed
 threshold_in_meters = 30
@@ -41,7 +41,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
     return R * c
 
-def removeDedundencies(csv_path):
+def removeRedundencies(csv_path):
     with open(csv_path) as file:
         reader = csv.DictReader(file)
         data = list(reader)
@@ -51,10 +51,12 @@ def removeDedundencies(csv_path):
 
         # Convert 'BaseDateTime' to datetime object for accurate sorting
         for row in data:
-            row['BaseDateTime'] = datetime.strptime(row['BaseDateTime'], '%Y-%m-%dT%H:%M:%S')  # Adjust format as needed
-            row['LAT'] = float(row['LAT'])
-            row['LON'] = float(row['LON'])
-
+            try:
+                row['BaseDateTime'] = datetime.strptime(row['BaseDateTime'], '%Y-%m-%dT%H:%M:%S')  # Adjust format as needed
+                row['LAT'] = float(row['LAT'])
+                row['LON'] = float(row['LON'])
+            except ValueError:
+                continue
         # Sort data by 'MMSI' and 'BaseDateTime'
         sorted_data = sorted(data, key=lambda row: (row['MMSI'], row['BaseDateTime']))
 
@@ -111,7 +113,7 @@ for file_name in os.listdir(zip_dir):
         # Check if the extracted CSV exists and process it
         csv_path = os.path.join(extract_dir, csv_name)
         if os.path.exists(csv_path):
-            removeDedundencies(csv_path)
+            removeRedundencies(csv_path)
 
             print(f'Processed: {csv_name}')
         else:
