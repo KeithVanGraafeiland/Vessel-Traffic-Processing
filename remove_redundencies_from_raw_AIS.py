@@ -4,6 +4,11 @@ import csv
 from datetime import datetime
 from math import radians, cos, sin, sqrt, atan2
 
+# # Directory containing the input ZIP files
+# zip_dir = 'AIS_2016_January'
+
+# # Directory to save extracted CSV files
+# extract_dir = 'AIS_2016_January_Processed'
 
 # Directory containing the input ZIP files
 zip_dir = r"E:\AIS\MarineCadastre\2023"
