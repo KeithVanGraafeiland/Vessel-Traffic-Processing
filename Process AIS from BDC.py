@@ -3,23 +3,26 @@ from datetime import datetime
 import os
 import zipfile
 
+import arcpy.management
+
 arcpy.env.overwriteOutput = True
 ## Tested in ArcGIS Pro 2.8.2 (Released)
 
 #ROOT = "C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/"
-ROOT = "D:/AIS_Processing/"
+ROOT = 'E:/ArcGIS/Projects/AIS/processing/'
 
 # Define Variables
 #input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-input_BDC = r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS_BDC.bdc\AIS_2023"
-out_tracks = ROOT + 'Reconstruct_Tracks_Out.gdb/US_Vessel_Traffic_2023'
-start_date = "1/1/2023"
+input_BDC = r'E:\ArcGIS\Projects\AIS\AIS.mfc\AIS2015'
+out_tracks_gdb = os.path.join(ROOT, 'Reconstruct_Tracks_Out.gdb')
+out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2015')
+start_date = "1/1/2015"
 
 # Define Constants (should use uppercase for constants ex: TRACK_FIELDS
 
-TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TransceiverClass'
+# TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TransceiverClass'
 #TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft;TranscieverClass'
-#TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft'
+TRACK_FIELDS = 'MMSI;VesselName;IMO;VesselType;Length;Width;Draft'
 VESSEL_TYPE_INFO = ROOT + 'Vessel_Traffic_Schema.gdb/VesselType_Codes'
 YEARLY_GDB = ROOT + 'Yearly_Vessel_Tracks.gdb'
 MONTHLY_GDB = ROOT + 'Monthly_Vessel_Tracks.gdb'
@@ -27,9 +30,17 @@ TRACK_SCHEMA = ROOT + 'Vessel_Traffic_Schema.gdb/Vessel_Tracks_Schema'
 TRACK_NAME = os.path.split(out_tracks)[1]
 TRACK_YEAR = TRACK_NAME.split("_")[3]
 YEAR_NAME = 'US_Vessel_Traffic_' + TRACK_YEAR
-MONTHLY_TRACKS_FOLDER = ROOT + 'Monthly_Products'
-CLEAN_TRACKS = YEARLY_GDB + "\\" + YEAR_NAME
-bdc_file = r"C:\Users\Administrator\Documents\ArcGIS\Projects\AIS\AIS_BDC.bdc"
+MONTHLY_TRACKS_FOLDER = os.path.join(ROOT, 'Monthly_Products')
+CLEAN_TRACKS = os.path.join(YEARLY_GDB, YEAR_NAME)
+bdc_file = r'E:\ArcGIS\Projects\AIS\AIS.mfc'
+
+if not os.path.exists(MONTHLY_TRACKS_FOLDER):
+    os.makedirs(MONTHLY_TRACKS_FOLDER)
+
+gdb_list = [YEARLY_GDB, MONTHLY_GDB,out_tracks_gdb]
+for gdb in gdb_list:
+    if not os.path.exists(gdb):
+        arcpy.management.CreateFileGDB(ROOT,str(os.path.basename(gdb)),out_version='CURRENT')
 
 def log(message):
     print(message,datetime.now())
@@ -50,7 +61,7 @@ def manage_attributes():
     log("Managing field names.....")
     arcpy.management.AlterField(out_tracks, "VesselName", "vessel_name", "vessel name")
     arcpy.management.AlterField(out_tracks, "VesselType", VESSEL_TYPE, "vessel type")
-    arcpy.management.AlterField(out_tracks, "TransceiverClass", "transceiver_class", "transceiver class")
+    # arcpy.management.AlterField(out_tracks, "TransceiverClass", "transceiver_class", "transceiver class")
     arcpy.management.AlterField(out_tracks, "COUNT", "vertices", "vertices")
 
     log("Joining vessel group and vessel class fields using vessel type codes.....")

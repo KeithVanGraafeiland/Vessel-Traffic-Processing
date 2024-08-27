@@ -6,10 +6,10 @@ from math import radians, cos, sin, sqrt, atan2
 
 
 # Directory containing the input ZIP files
-zip_dir = 'AIS_2016_January'
+zip_dir = r"E:\AIS\MarineCadastre\2023"
 
 # Directory to save extracted CSV files
-extract_dir = 'AIS_2016_January_Processed'
+extract_dir = r"E:\AIS\MarineCadastre\2023\processed"
 
 # Two adjacent points of the same vessel within this threshold will be removed
 threshold_in_meters = 30
@@ -66,7 +66,7 @@ def cleanupData(data):
 
     return cleaned_data
 
-def removeDedundencies(csv_path):
+def removeRedundencies(csv_path):
     with open(csv_path) as file:
         reader = csv.DictReader(file)
         data = cleanupData(list(reader))
@@ -136,7 +136,7 @@ for file_name in os.listdir(zip_dir):
         # Check if the extracted CSV exists and process it
         csv_path = os.path.join(extract_dir, csv_name)
         if os.path.exists(csv_path):
-            removeDedundencies(csv_path)
+            removeRedundencies(csv_path)
 
             print(f'Processed: {csv_name}')
         else:
