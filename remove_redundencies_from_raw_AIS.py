@@ -41,19 +41,44 @@ def haversine(lat1, lon1, lat2, lon2):
 
     return R * c
 
+# Clean up the input csv data and remove rows with bad values
+def cleanupData(data):
+    cleaned_data = []
+
+    for row in data:
+        base_datetime = row.get('BaseDateTime', '')
+
+        # Check if the base_datetime value is in the correct format before attempting to parse it
+        if len(base_datetime) == 19 and base_datetime[4] == '-' and base_datetime[7] == '-' and base_datetime[10] == 'T':
+            try:
+                # Attempt to parse the 'BaseDateTime' field
+                row['BaseDateTime'] = datetime.strptime(base_datetime, '%Y-%m-%dT%H:%M:%S')
+                row['LAT'] = float(row['LAT'])
+                row['LON'] = float(row['LON'])
+                cleaned_data.append(row)  # Add row to data list if parsing is successful
+            except ValueError:
+                print(row)
+                # Skip rows with invalid 'BaseDateTime' values
+                continue
+        else:
+            # Skip rows where 'BaseDateTime' doesn't match the expected format
+            continue
+
+    return cleaned_data
+
 def removeDedundencies(csv_path):
     with open(csv_path) as file:
         reader = csv.DictReader(file)
-        data = list(reader)
+        data = cleanupData(list(reader))
 
         # Extract field names from the input CSV
         fieldnames = reader.fieldnames
 
-        # Convert 'BaseDateTime' to datetime object for accurate sorting
-        for row in data:
-            row['BaseDateTime'] = datetime.strptime(row['BaseDateTime'], '%Y-%m-%dT%H:%M:%S')  # Adjust format as needed
-            row['LAT'] = float(row['LAT'])
-            row['LON'] = float(row['LON'])
+        # # Convert 'BaseDateTime' to datetime object for accurate sorting
+        # for row in data:
+        #     row['BaseDateTime'] = datetime.strptime(row['BaseDateTime'], '%Y-%m-%dT%H:%M:%S')  # Adjust format as needed
+        #     row['LAT'] = float(row['LAT'])
+        #     row['LON'] = float(row['LON'])
 
         # Sort data by 'MMSI' and 'BaseDateTime'
         sorted_data = sorted(data, key=lambda row: (row['MMSI'], row['BaseDateTime']))
