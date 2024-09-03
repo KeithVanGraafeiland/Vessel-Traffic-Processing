@@ -9,14 +9,14 @@ arcpy.env.overwriteOutput = True
 ## Tested in ArcGIS Pro 2.8.2 (Released)
 
 #ROOT = "C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/"
-ROOT = 'E:/ArcGIS/Projects/AIS/processing/'
+ROOT = 'F:/ArcGIS/Projects/AIS/processing/'
 
 # Define Variables
 #input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-input_BDC = r'E:\ArcGIS\Projects\AIS\AIS.mfc\AIS2015'
+input_BDC = r'F:\ArcGIS\Projects\AIS\AIS.mfc\AIS_2018_Filtered'
 out_tracks_gdb = os.path.join(ROOT, 'Reconstruct_Tracks_Out.gdb')
-out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2015')
-start_date = "1/1/2015"
+out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2018')
+start_date = "1/1/2018"
 
 # Define Constants (should use uppercase for constants ex: TRACK_FIELDS
 
@@ -32,7 +32,7 @@ TRACK_YEAR = TRACK_NAME.split("_")[3]
 YEAR_NAME = 'US_Vessel_Traffic_' + TRACK_YEAR
 MONTHLY_TRACKS_FOLDER = os.path.join(ROOT, 'Monthly_Products')
 CLEAN_TRACKS = os.path.join(YEARLY_GDB, YEAR_NAME)
-bdc_file = r'E:\ArcGIS\Projects\AIS\AIS.mfc'
+bdc_file = r'F:\ArcGIS\Projects\AIS\AIS.mfc'
 
 if not os.path.exists(MONTHLY_TRACKS_FOLDER):
     os.makedirs(MONTHLY_TRACKS_FOLDER)

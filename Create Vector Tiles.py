@@ -25,7 +25,7 @@ else:
 
 def create_vector_tiles():
     tracks_list = []
-    for fc in arcpy.ListFeatureClasses('US_Vessel_Traffic_2015*'):
+    for fc in arcpy.ListFeatureClasses('US_Vessel_Traffic_2018*'):
         tracks_list.append(fc)
     print(tracks_list)
     
