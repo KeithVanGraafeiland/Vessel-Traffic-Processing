@@ -6,17 +6,17 @@ import zipfile
 import arcpy.management
 
 arcpy.env.overwriteOutput = True
-## Tested in ArcGIS Pro 2.8.2 (Released)
+## Tested in ArcGIS Pro 3.3.1 (Released)
 
 #ROOT = "C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/"
 ROOT = 'F:/ArcGIS/Projects/AIS/processing/'
 
 # Define Variables
 #input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-input_BDC = r'F:\ArcGIS\Projects\AIS\AIS.mfc\AIS_2018_Filtered'
+input_BDC = r'F:\ArcGIS\Projects\AIS\AIS.mfc\AIS_2024_Filtered'
 out_tracks_gdb = os.path.join(ROOT, 'Reconstruct_Tracks_Out.gdb')
-out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2018')
-start_date = "1/1/2018"
+out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2024')
+start_date = "1/1/2024"
 
 # Define Constants (should use uppercase for constants ex: TRACK_FIELDS
 
