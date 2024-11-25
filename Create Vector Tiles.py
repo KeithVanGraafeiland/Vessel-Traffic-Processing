@@ -5,14 +5,14 @@ arcpy.env.overwriteOutput = True
 ## Tested in ArcGIS Pro 2.8.3 (Released)
 
 # Define Variables
-aprx = arcpy.mp.ArcGISProject(r'F:\ArcGIS\Projects\AIS\AIS.aprx')
-symbology_layer = r"F:\ArcGIS\Projects\AIS\processing\Vessel Traffic Layer Template Monthly.lyrx"
-symbology_gen_layer = r"F:\ArcGIS\Projects\AIS\processing\Vessel Traffic Layer Template Monthly gen.lyrx"
+aprx = arcpy.mp.ArcGISProject(r'E:\gis_projects\AIS\AIS.aprx')
+symbology_layer = r"E:\gis_projects\AIS\processing\Vessel Traffic Layer Template Monthly.lyrx"
+symbology_gen_layer = r"E:\gis_projects\AIS\processing\Vessel Traffic Layer Template Monthly gen.lyrx"
 vt_folder = r"E:\analysis\Vector_Tiles"
 vt_index_gdb = os.path.join(vt_folder,"vector_tile.gdb")
 # vt_index = os.path.join(vt_index_gdb,"vector_tile_index")
-tracks_db = r"F:\ArcGIS\Projects\AIS\Release_Data\sept2024\monthly_vessel_tracks_clean.gdb"
-tracks_gen_db = r"F:\ArcGIS\Projects\AIS\Release_Data\sept2024\monthly_vessel_tracks_generalized.gdb"
+tracks_db = r"E:\gis_projects\AIS\Release_Data\nov2024\monthly_vessel_tracks_clean.gdb"
+tracks_gen_db = r"E:\gis_projects\AIS\Release_Data\nov2024\monthly_vessel_tracks_generalized.gdb"
 
 arcpy.env.workspace = tracks_db
 
@@ -26,7 +26,8 @@ if not arcpy.Exists(vt_index_gdb):
 def create_vector_tiles():
     tracks_list = []
     for fc in arcpy.ListFeatureClasses():
-        tracks_list.append(fc)
+        if '2024_04' in fc or '2024_05' in fc or '2024_06' in fc:
+                tracks_list.append(fc)
     print(tracks_list)
     
     for track in tracks_list:
@@ -35,8 +36,10 @@ def create_vector_tiles():
         else:
             vt_map = aprx.listMaps("Vector Tile*")[0]
             print(vt_map.name)           
-            track_name = tracks_db + "\\" + track.replace("_clean","")
-            trackgen_name = tracks_gen_db + "\\" + track.replace("_clean","") + "_gen"
+            # track_name = tracks_db + "\\" + track.replace("_clean","")
+            track_name = tracks_db + "\\" + track
+            # trackgen_name = tracks_gen_db + "\\" + track.replace("_clean","") + "_gen"
+            trackgen_name = tracks_gen_db + "\\" + track.replace("_clean","_gen")
             index_name = vt_index_gdb + "\\" + track.replace("_clean","") + "index"
             # vt_map.addDataFromPath(trackgen_name)
             # vt_map.addDataFromPath(track_name)
@@ -78,6 +81,8 @@ def create_vector_tiles():
                 print(fc_layer)
                 print(vt_package)
                 aprx.save()
+
+                print("Creating Vector Tile Index for..." + track)
             
                 arcpy.management.CreateVectorTileIndex(
                     in_map=vt_map,
@@ -87,9 +92,37 @@ def create_vector_tiles():
                     vertex_count=10000
                 )
                 aprx.save()
-
-                arcpy.management.CreateVectorTilePackage(vt_map, vt_package, "ONLINE", "", "INDEXED", 295828763.795777, 564.248588, index_name, summary, tags)
-                arcpy.management.SharePackage(vt_package, username, password, summary, tags, credits, "MYGROUPS", "Vessel Traffic","MYORGANIZATION", "TRUE", "AIS Vector Tiles")
+                
+                print("Creating Vector Tile Package for..." + track)
+## https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/create-vector-tile-package.htm
+                arcpy.management.CreateVectorTilePackage(
+                    in_map = vt_map, 
+                    output_file = vt_package,
+                    service_type = "ONLINE",
+                    tiling_scheme = "",
+                    tile_structure = "INDEXED",
+                    min_cached_scale = 295828763.795777,
+                    max_cached_scale = 564.248588,
+                    index_polygons = index_name,
+                    summary = summary,
+                    tags = tags)
+                
+                print("Sharing Vector Tile Package for..." + track)
+## https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/share-package.htm
+                arcpy.management.SharePackage(
+                    in_package = vt_package,
+                    username = username,
+                    password = password,
+                    summary = summary,
+                    tags = tags,
+                    credits = credits,
+                    public = "MYGROUPS",
+                    groups = "Vessel Traffic",
+                    organization = "MYORGANIZATION",
+                    publish_web_layer = "TRUE",
+                    portal_folder = "AIS Vector Tiles")
                 aprx.save()
+                
+                print("Done processing..." + track)
 
 create_vector_tiles()

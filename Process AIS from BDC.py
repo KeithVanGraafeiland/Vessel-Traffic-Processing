@@ -9,12 +9,12 @@ arcpy.env.overwriteOutput = True
 ## Tested in ArcGIS Pro 3.3.1 (Released)
 
 #ROOT = "C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/"
-ROOT = 'F:/ArcGIS/Projects/AIS/processing/'
+ROOT = 'E:/gis_projects/AIS/processing/'
 
 # Define Variables
 #input_BDC = r"C:\Users\keit8223\Documents\ArcGIS\Projects\AIS\AIS_2020.bdc\AIS_2020"
-input_BDC = r'F:\ArcGIS\Projects\AIS\AIS.mfc\AIS_2024_Filtered'
-out_tracks_gdb = os.path.join(ROOT, 'Reconstruct_Tracks_Out.gdb')
+input_BDC = r'E:\gis_projects\AIS\AIS.mfc\AIS_2024_Filtered'
+out_tracks_gdb = os.path.join(ROOT, 'Reconstruct_Tracks_Out_Filtered.gdb')
 out_tracks = os.path.join(out_tracks_gdb, 'US_Vessel_Traffic_2024')
 start_date = "1/1/2024"
 
@@ -32,7 +32,8 @@ TRACK_YEAR = TRACK_NAME.split("_")[3]
 YEAR_NAME = 'US_Vessel_Traffic_' + TRACK_YEAR
 MONTHLY_TRACKS_FOLDER = os.path.join(ROOT, 'Monthly_Products')
 CLEAN_TRACKS = os.path.join(YEARLY_GDB, YEAR_NAME)
-bdc_file = r'F:\ArcGIS\Projects\AIS\AIS.mfc'
+bdc_file = (os.path.dirname(input_BDC))
+
 
 if not os.path.exists(MONTHLY_TRACKS_FOLDER):
     os.makedirs(MONTHLY_TRACKS_FOLDER)
@@ -53,6 +54,7 @@ def process_tracks():
                                              'PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],'
                                              'UNIT["Meter",1.0]]'):
         arcpy.gapro.ReconstructTracks(input_BDC, out_tracks, TRACK_FIELDS, "GEODESIC", '', None, None, "30 Minutes", "1 Miles", "1 Days", start_date, "SOG MEAN;COG MEAN;Heading MEAN", None, "GAP")
+    log("out tracks location: " + out_tracks)
     log("-----COMPLETED RECONSTRUCT TRACKS-----")
 
 def manage_attributes():
@@ -84,6 +86,7 @@ def optimize_tracks():
                                         TRACK_SCHEMA, "DISABLED", "DISABLED")
     log("Appending tracks to empty feature class.....")
     arcpy.management.Append(out_tracks, CLEAN_TRACKS, "NO_TEST")
+    log("Clean tracks location: " + CLEAN_TRACKS)
 
     log("Defining projection on tracks.....")
     arcpy.management.DefineProjection(CLEAN_TRACKS, 'PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",'

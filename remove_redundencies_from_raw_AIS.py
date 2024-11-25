@@ -11,10 +11,10 @@ from math import radians, cos, sin, sqrt, atan2
 # extract_dir = 'AIS_2016_January_Processed'
 
 # Directory containing the input ZIP files
-zip_dir = r"F:\AIS\2024"
+zip_dir = r"E:\analysis\AIS\2024\q2"
 
 # Directory to save extracted CSV files
-extract_dir = r"F:\AIS\2024\processed"
+extract_dir = r"E:\analysis\AIS\2024\q2\processed"
 
 # Two adjacent points of the same vessel within this threshold will be removed
 threshold_in_meters = 30
