@@ -1,21 +1,25 @@
 import os
 import arcpy
 from credentials import username, password
+from arcgis.gis import GIS
 arcpy.env.overwriteOutput = True
 ## Tested in ArcGIS Pro 2.8.3 (Released)
 
 # Define Variables
-aprx = arcpy.mp.ArcGISProject(r'F:\ArcGIS\Projects\AIS\AIS.aprx')
-symbology_layer = r"F:\ArcGIS\Projects\AIS\processing\Vessel Traffic Layer Template Monthly.lyrx"
-symbology_gen_layer = r"F:\ArcGIS\Projects\AIS\processing\Vessel Traffic Layer Template Monthly gen.lyrx"
-vt_folder = r"F:\ArcGIS\Projects\AIS\processing\Vector_Tiles"
+ROOT = r'D:\Temp\AIS\processing'
+aprx_path = os.path.join(ROOT, 'AIS_ProProject', 'AIS.aprx')
+aprx = arcpy.mp.ArcGISProject(aprx_path)
+symbology_layer = os.path.join(os.path.dirname(aprx_path), "Vessel Traffic Layer Template Monthly.lyrx")
+symbology_gen_layer = os.path.join(os.path.dirname(aprx_path), "Vessel Traffic Layer Template Monthly gen.lyrx")
+vt_folder = os.path.join(ROOT, "Vector_Tiles")
 vt_index_gdb = os.path.join(vt_folder,"vector_tile.gdb")
 # vt_index = os.path.join(vt_index_gdb,"vector_tile_index")
-tracks_db = r"F:\ArcGIS\Projects\AIS\processing\Monthly_Vessel_Tracks.gdb"
+tracks_db = os.path.join(ROOT,"Monthly_Vessel_Tracks.gdb")
 
 arcpy.env.workspace = tracks_db
 
-
+if not os.path.exists(vt_folder):
+    os.makedirs(vt_folder)
 
 if arcpy.Exists(vt_index_gdb):
     pass
@@ -25,22 +29,22 @@ else:
 
 def create_vector_tiles():
     tracks_list = []
-    for fc in arcpy.ListFeatureClasses('US_Vessel_Traffic_2015*'):
+    for fc in arcpy.ListFeatureClasses('US_Vessel_Traffic_2025_*'):
         tracks_list.append(fc)
     print(tracks_list)
     
     for track in tracks_list:
-        if "gen" in track:
+        if "gen" in track or "filtered" in track:
             pass
         else:
             vt_map = aprx.listMaps("Vector Tile*")[0]
             print(vt_map.name)           
-            track_name = tracks_db + "\\" + track
-            trackgen_name = tracks_db + "\\" + track + "_gen"
-            index_name = vt_index_gdb + "\\" + track + "index"
+            track_name = os.path.join(tracks_db, track)
+            trackgen_name = os.path.join(tracks_db, track + "_gen")
+            index_name = os.path.join(vt_index_gdb, track + "index")
             # vt_map.addDataFromPath(trackgen_name)
             # vt_map.addDataFromPath(track_name)
-            vt_package = vt_folder + "\\" + track + "_scaled.vtpk"
+            vt_package = os.path.join(vt_folder, track + "_optimized.vtpk")
             global fc_layer
             global fc_gen_layer
             fc_layer = vt_map.listLayers()[0]
@@ -67,8 +71,6 @@ def create_vector_tiles():
             summary = "Monthly AIS Vessel Traffic Vector Tiles for " + track
             tags = "AIS, Vessel Traffic, U.S. Vessel Traffic"
             credits = "NOAA, BOEM, USCG, Marine Cadastre, Esri"
-            # arcpy.management.ApplySymbologyFromLayer(fc_layer,symbology_layer,"VALUE_FIELD vessel_group vessel_group", "MAINTAIN")
-            # arcpy.management.ApplySymbologyFromLayer(fc_gen_layer,symbology_gen_layer,"VALUE_FIELD vessel_group vessel_group", "MAINTAIN")
             print(track_name)
             print(index_name)
             print(fc_layer)
@@ -85,9 +87,22 @@ def create_vector_tiles():
             aprx.save()
 
             arcpy.management.CreateVectorTilePackage(vt_map, vt_package, "ONLINE", "", "INDEXED", 295828763.795777, 564.248588, index_name, summary, tags)
-            arcpy.management.SharePackage(vt_package, username, password, summary, tags, credits, "MYGROUPS", "Vessel Traffic","MYORGANIZATION", "TRUE", "AIS Vector Tiles")
-            # vt_map.removeLayer(fc_layer)
-            # vt_map.removeLayer(fc_gen_layer)
+            print(f"Created vector tile package: {vt_package}")
+            # Check if vt_package already exists in ArcGIS Online
+            try:
+                gis = GIS("https://www.arcgis.com", username, password)
+                title_base = os.path.splitext(os.path.basename(vt_package))[0]
+                results = gis.content.search(query=f'title:"{title_base}"', item_type="Vector Tile Package", max_items=1)
+                if results:
+                    print(f"Item with title '{title_base}' already exists in ArcGIS Online (id: {results[0].id}). Skipping SharePackage.")
+                    continue
+                else:
+                    print(f"No existing item named '{title_base}' found in ArcGIS Online. Proceeding to share.")
+                    arcpy.management.SharePackage(vt_package, username, password, summary, tags, credits, "MYGROUPS", "Vessel Traffic","MYORGANIZATION", "TRUE", "AIS Vector Tiles")
+                    print(f"Shared vector tile package: {vt_package}")
+            except Exception as e:
+                print(f"Could not check ArcGIS Online for existing package: {e}. Proceeding to share.")
+            
             aprx.save()
 
 create_vector_tiles()

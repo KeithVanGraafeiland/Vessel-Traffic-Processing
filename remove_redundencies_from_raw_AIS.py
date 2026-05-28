@@ -11,13 +11,18 @@ from math import radians, cos, sin, sqrt, atan2
 # extract_dir = 'AIS_2016_January_Processed'
 
 # Directory containing the input ZIP files
-zip_dir = r"E:\AIS\MarineCadastre\2023"
+# zip_dir = r"D:\Temp\AIS\AIS_Data\AIS_2024_RAW"
 
 # Directory to save extracted CSV files
-extract_dir = r"E:\AIS\MarineCadastre\2023\processed"
+extract_dir = r"D:\Temp\AIS\AIS_Data\AIS_2025_RAW"
+
+# Create the extraction directory if it doesn't exist
+if not os.path.exists(extract_dir):
+    os.makedirs(extract_dir)
 
 # Two adjacent points of the same vessel within this threshold will be removed
-threshold_in_meters = 30
+threshold_in_meters = 100
+## changed to 100 meters from 30 meters on 2025-11-03 to eliminate crashes
 
 # def process_csv(csv_path):
 #     output_csv_path = os.path.join(os.path.dirname(csv_path), f'Filtered_{os.path.basename(csv_path)}')
@@ -113,7 +118,7 @@ def removeRedundencies(csv_path):
         #     print(row)
         #     # Write the filtered data to a new CSV file
 
-    output_csv_path = os.path.join(os.path.dirname(csv_path), f'Filtered_{os.path.basename(csv_path)}')
+    output_csv_path = os.path.join(extract_dir, f'Filtered_{threshold_in_meters}m_{os.path.basename(csv_path)}')
 
     with open(output_csv_path, 'w', newline='') as outfile:
         writer = csv.DictWriter(outfile, fieldnames=fieldnames)
@@ -128,21 +133,22 @@ def removeRedundencies(csv_path):
     outfile.close()
 
 # Iterate through all ZIP files in the directory
-for file_name in os.listdir(zip_dir):
-    if file_name.endswith('.zip'):
-        zip_path = os.path.join(zip_dir, file_name)
-        csv_name = file_name.replace('.zip', '.csv')
-        extract_path = os.path.join(extract_dir, csv_name)
+for file_name in os.listdir(extract_dir):
+    # if file_name.endswith('.zip'):
+    #     zip_path = os.path.join(zip_dir, file_name)
+    #     csv_name = file_name.replace('.zip', '.csv')
+    #     extract_path = os.path.join(extract_dir, csv_name)
         
-        # Unzip the file
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_dir)
+    #     # Unzip the file
+    #     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    #         zip_ref.extractall(extract_dir)
         
-        # Check if the extracted CSV exists and process it
-        csv_path = os.path.join(extract_dir, csv_name)
-        if os.path.exists(csv_path):
-            removeRedundencies(csv_path)
-
-            print(f'Processed: {csv_name}')
-        else:
-            print(f'CSV file not found: {csv_name}')
+    #     # Check if the extracted CSV exists and process it
+    #     csv_path = os.path.join(extract_dir, csv_name)
+    #     if os.path.exists(csv_path):
+    if file_name.endswith('.csv'):
+        csv_path = os.path.join(extract_dir, file_name)   
+        removeRedundencies(csv_path)
+        print(f'Processed: {file_name}')
+    else:
+        print(f'CSV file not found: {file_name}')
