@@ -1,6 +1,7 @@
 import os
 import arcpy
 from credentials import username, password
+from arcgis.gis import GIS
 arcpy.env.overwriteOutput = True
 ## Tested in ArcGIS Pro 2.8.3 (Released)
 
@@ -30,7 +31,7 @@ def create_vector_tiles():
     print(tracks_list)
     
     for track in tracks_list:
-        if "gen" in track:
+        if "gen" in track or "filtered" in track:
             pass
         else:
             vt_map = aprx.listMaps("Vector Tile*")[0]
