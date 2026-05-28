@@ -6,7 +6,7 @@ import zipfile
 import arcpy.management
 
 arcpy.env.overwriteOutput = True
-## Tested in ArcGIS Pro 2.8.2 (Released)
+## Tested in ArcGIS Pro 3.3.1 (Released)
 
 #ROOT = "C:/Users/keit8223/Documents/ArcGIS/Projects/AIS/AIS Processing/"
 ROOT = r'D:\Temp\AIS\processing'
